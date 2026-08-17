@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conectando ao TikTok…</title>
+  <style>
+    body{font-family:system-ui,Arial,sans-serif;background:#111;color:#eee;
+         display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;text-align:center}
+    .box{max-width:420px;padding:2rem}
+    code{background:#000;padding:.3rem .5rem;border-radius:6px;word-break:break-all;display:inline-block;margin-top:.4rem}
+    .muted{color:#999;font-size:14px}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2 id="titulo">Conectando sua conta do TikTok…</h2>
+    <p id="msg" class="muted">Redirecionando de volta ao aplicativo…</p>
+    <div id="fallback" style="display:none">
+      <p class="muted">Se o app não abrir sozinho, copie este código e cole no aplicativo:</p>
+      <code id="code"></code>
+    </div>
+  </div>
+  <script>
+    // Página-ponte: o TikTok redireciona pra cá (domínio verificado). Aqui só
+    // repassamos o ?code=&state= de volta pro app que está rodando na máquina do
+    // usuário (http://localhost:8720). Não guardamos nada.
+    (function () {
+      var q = window.location.search;
+      var p = new URLSearchParams(q);
+      var code = p.get('code');
+      var err = p.get('error') || p.get('error_description');
+      if (err) {
+        document.getElementById('titulo').textContent = 'Não deu certo';
+        document.getElementById('msg').textContent = 'Erro na autorização: ' + err;
+        return;
+      }
+      if (!code) {
+        document.getElementById('msg').textContent = 'Nenhum código foi recebido do TikTok.';
+        return;
+      }
+      // mostra o código como plano B (caso o navegador bloqueie o pulo pro localhost)
+      document.getElementById('code').textContent = code;
+      document.getElementById('fallback').style.display = 'block';
+      // repassa TUDO (code + state) pro app local
+      window.location.replace('http://localhost:8720/callback' + q);
+    })();
+  </script>
+</body>
+</html>
